@@ -4,6 +4,10 @@
         <title></title>
         
         <style type="text/css">
+            body {
+                margin: 0;
+            }
+            
             div#ball {
                 position: absolute;
                 width: 100px;
@@ -16,18 +20,17 @@
         <script type="text/javascript" src="simple1.js"></script>
         
         <script type="text/javascript">
-            function draw() {
-                var ball = document.getElementById('ball');
+            /*function draw() {
+                var ball = document.getElementById("ball");
                 var leftPos = parseInt(ball.style.left);
-                if (isNaN(leftPos)) { leftPos = 0 };
+                if(isNaN(leftPos)) { leftPos = 0 };
                 ball.style.left = leftPos + 10 + "px";
             }
             
-            
             var timeInterval = 1000 / 30;
-            window.onload = function () { setInterval(draw, timeInterval); };
+            window.onload = function () { setInterval(draw, timeInterval) }*/
             
-            //window.onload = function () { ANIMATION.start() };
+            window.onload = function() { ANIMATION.start(); };
         </script>
     </head>
     <body>
