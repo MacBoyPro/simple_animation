@@ -10,22 +10,24 @@ function ball(theContext, theCanvasWidth, theCanvasHeight) {
     this.antiClockwise = true;
     this.pongSound = null;
     
+    this.magnitude = 2;
+    
     this.direction = { 'x' : 1, 'y' : 1 };
     
     this.center = { 'x' : this.radius * 2, 'y' : this.radius * 2 };
     
-    this.draw = function (magnitude) {
+    this.draw = function () {
         this.context.fillStyle=this.color;
         this.context.beginPath();
         
         // Calculate the new x value
         var currentX = this.center.x - this.radius;
-        var vectorX = currentX + ( magnitude * this.direction.x );
+        var vectorX = currentX + ( this.magnitude * this.direction.x );
         this.center.x = vectorX + this.radius;
         
         // Calculate the new y value
         var currentY = this.center.y - this.radius;
-        var vectorY = currentY + (magnitude * this.direction.y);
+        var vectorY = currentY + (this.magnitude * this.direction.y);
         this.center.y = vectorY + this.radius;
         
         this.context.arc(vectorX,
@@ -55,7 +57,7 @@ function ball(theContext, theCanvasWidth, theCanvasHeight) {
         }
         
         if(collision) { 
-            if (!this.pongSound) { this.pongSound = document.getElementById('pong') };
+            if (!this.pongSound) { this.pongSound = document.getElementById('pong'); };
             this.pongSound.Play(); 
         };
     };
@@ -64,41 +66,44 @@ function ball(theContext, theCanvasWidth, theCanvasHeight) {
 function paddle(theContext, theCanvasWidth) {
     this.context = theContext;
     this.canvasWidth = theCanvasWidth;
-    this.width = 200;
-    this.height = 75;
+    this.width = 75;
+    this.height = 15;
     this.color = "#0000FF";
     
     this.direction = 0;
+    this.isMoving = true;
     
-    this.center = { 'x' : this.width, 'y' : this.height };
+    this.magnitude = 4;
     
-    this.draw = function (magnitude) {
+    this.center = { 'x' : this.width, 'y' : 400 - (this.height / 2) };
+    
+    this.draw = function () {
         this.context.fillStyle = this.color;
         
+        // Calculate the new x value
         var halfWidth = this.width / 2;
-        var currentX = this.center.x - halfWidth;
-        var vectorX = currentX;
-        if(this.direction != 0) {
-            // Calculate the new x value
-            vectorX += magnitude * this.direction;
-            this.center.x = vectorX + halfWidth;
-        }
+        var currentLeft = this.center.x - halfWidth;
+        var newLeft = currentLeft + this.magnitude * this.direction;
+        var newCenterX = newLeft + halfWidth;
         
-        this.context.fillRect(vectorX, 
-                              this.center.y, 
-                              this.width, 
-                              this.height);
-                              
-        this.collisionDetect();                          
+        if(!this.collisionDetect(newCenterX)){ 
+            this.center.x = newCenterX
+         }  
+         
+         this.context.fillRect(this.center.x - halfWidth, 
+                                  this.center.y - this.height / 2, 
+                                  this.width, 
+                                  this.height);
     };
     
-    this.collisionDetect = function() {
+    this.collisionDetect = function(newPos) {
         var collision = false;
         var halfWidth = this.width / 2;
-        if(this.center.x + halfWidth >= this.canvasWidth || this.center.x - halfWidth < 0) {
-            
-            this.direction = 0;
+        if(newPos + halfWidth > this.canvasWidth || newPos - halfWidth < 0) {
+            collision = true;
         }
+        
+        return collision;
     };
 };
 
@@ -112,7 +117,7 @@ BRICKOUT.canvasHeight = 500;
 BRICKOUT.ball = null;
 BRICKOUT.paddle = null;
 
-BRICKOUT.magnitude = 2;
+BRICKOUT.pongSound = null;
 
 BRICKOUT.timerInterval = 1000 / 60; //Update the display 60 times per second
 BRICKOUT.timer = null;
@@ -123,8 +128,19 @@ BRICKOUT.clearContext = function () {
 
 BRICKOUT.draw = function() {
     BRICKOUT.clearContext();
-    BRICKOUT.ball.draw(BRICKOUT.magnitude);
-    BRICKOUT.paddle.draw(BRICKOUT.magnitude);
+    BRICKOUT.ball.draw();
+    BRICKOUT.paddle.draw();
+    
+    var paddleCollision = BRICKOUT.ball.center.y >= BRICKOUT.paddle.center.y - (BRICKOUT.paddle.height / 2) &&
+                          BRICKOUT.ball.center.y <= BRICKOUT.paddle.center.y + (BRICKOUT.paddle.height / 2) &&
+                          BRICKOUT.ball.center.x >= BRICKOUT.paddle.center.x - (BRICKOUT.paddle.width / 2) &&
+                          BRICKOUT.ball.center.x <= BRICKOUT.paddle.center.x + (BRICKOUT.paddle.width / 2);
+                          
+    if(paddleCollision) {
+        BRICKOUT.ball.direction.y = -BRICKOUT.ball.direction.y;
+        if (!BRICKOUT.pongSound) { BRICKOUT.pongSound = document.getElementById('pong'); };
+            BRICKOUT.pongSound.Play(); 
+    }                      
 };
 
 BRICKOUT.currentTime = function() {
@@ -150,7 +166,7 @@ BRICKOUT.start = function (context,canvas) {
         }
     }
     
-    document.onkeyup=function(e){
+    document.onkeyup=function(e){ 
         BRICKOUT.paddle.direction = 0;
     }
     
