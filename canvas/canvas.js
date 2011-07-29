@@ -22,45 +22,49 @@ function ball(theContext, theCanvasWidth, theCanvasHeight) {
         this.context.beginPath();
         
         // Calculate the new x value
-        var currentX = this.center.x - this.radius;
-        var vectorX = currentX + ( this.magnitude * this.direction.x );
-        this.center.x = vectorX + this.radius;
+        var currentLeft = this.center.x - this.radius;
+        var newLeft = currentLeft + this.magnitude * this.direction.x;
+        var newCenterX = newLeft + this.radius;
         
         // Calculate the new y value
-        var currentY = this.center.y - this.radius;
-        var vectorY = currentY + (this.magnitude * this.direction.y);
-        this.center.y = vectorY + this.radius;
+        var currentTop = this.center.y - this.radius;
+        var newTop = currentTop + this.magnitude * this.direction.y;
+        var newCenterY = newTop + this.radius;
         
-        this.context.arc(vectorX,
-                         vectorY,
+        if(!this.collisionDetect(newCenterX,newCenterY)){ 
+            this.center.x = newCenterX;
+            this.center.y = newCenterY;
+        }
+         
+        this.context.arc(this.center.x - this.radius,
+                         this.center.y - this.radius,
                          this.radius,
                          this.startAngle,
                          this.endAngle,
                          this.antiClockwise);
         this.context.closePath();
         this.context.fill();
-        
-        this.collisionDetect();
     };
     
-    this.collisionDetect = function() {
+    this.collisionDetect = function(newPosLeft, newPosTop) {
         var collision = false;
-        if(this.center.x + this.radius >= this.canvasWidth || this.center.x - this.radius < 0) {
-            console.log("HIT");
-            this.direction.x = this.direction.x * -1;
+        
+        if(newPosLeft + this.radius >= this.canvasWidth || newPosLeft - this.radius < 0) {
             collision = true;
+            this.direction.x = -this.direction.x;
         }
         
-        if(this.center.y + this.radius >= this.canvasHeight || this.center.y - this.radius < 0) {
-            console.log("HIT");
-            this.direction.y = this.direction.y * -1;
+        if(newPosTop + this.radius > this.canvasHeight || newPosTop - this.radius < 0) {
             collision = true;
+            this.direction.y = -this.direction.y;
         }
         
         if(collision) { 
             if (!this.pongSound) { this.pongSound = document.getElementById('pong'); };
             this.pongSound.Play(); 
         };
+        
+        return collision;
     };
 };
 
@@ -122,8 +126,7 @@ function brick(theContext) {
     
     this.draw = function() {
         
-        this.context.fillStyle = "rgba(0,200,0," + this.alpha + ")";
-        this.context.globalAlpha = this.alpha;
+        this.context.fillStyle = "rgba(" + this.color.red + "," + this.color.green + "," + this.color.blue + "," + this.alpha + ")";
         
         var halfWidth = this.width / 2;
         this.context.fillRect(this.center.x - halfWidth, 
@@ -188,7 +191,7 @@ BRICKOUT.draw = function() {
             
             if(BRICKOUT.bricks[x][y].alpha > 0 && BRICKOUT.intersect(BRICKOUT.ball,BRICKOUT.bricks[x][y])) {
                 BRICKOUT.processCollision(BRICKOUT.bricks[x][y]);
-                //pongSound.Play();
+                //pongSound.Play(); 
             }
         }
     }
@@ -248,7 +251,7 @@ BRICKOUT.intersect = function(elementOne,elementTwo) {
 }
 
 BRICKOUT.initializeBricks = function() {
-    var brickTypes = ['#000000', '#FF6103', '#00FF00', '#FFFF00'];
+    var brickTypes = ["#00FF00", '#FF6103', '#00FF00', '#FFFF00'];
     
     BRICKOUT.bricks = new Array(BRICKOUT.numBricks);
     
@@ -261,14 +264,18 @@ BRICKOUT.initializeBricks = function() {
     
     for(y = 0; y < BRICKOUT.numRows; y++) {
         for(x = 0; x < BRICKOUT.numBricks; x++) {
-            var color = brickTypes[(count++ % brickTypes.length)];
             var leftPos = x * BRICKOUT.brickWidth;
             var topPos = y * BRICKOUT.brickHeight;
+            
+            var red = Math.floor(Math.random()*255);
+            var green = Math.floor(Math.random()*255);
+            var blue = Math.floor(Math.random()*255);
+            
             
             BRICKOUT.bricks[x][y] = new brick(BRICKOUT.context);
             BRICKOUT.bricks[x][y].width = BRICKOUT.brickWidth;
             BRICKOUT.bricks[x][y].height = BRICKOUT.brickHeight;
-            BRICKOUT.bricks[x][y].color = { 'r' : 0, 'g' : 255, 'b' : 0 };
+            BRICKOUT.bricks[x][y].color = { 'red' : red, 'green' : green, 'blue' : blue };
             BRICKOUT.bricks[x][y].center = { 'x' : leftPos + BRICKOUT.brickWidth/2, 
                                              'y' : topPos + BRICKOUT.brickHeight/2 };
         }
