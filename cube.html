@@ -1,0 +1,66 @@
+<!DOCTYPE html SYSTEM "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <title></title>
+        
+        <style type="text/css">
+            
+            div#container {
+              padding-top:100px; 
+              -webkit-perspective: 800;
+            }
+            
+            div#cube  {
+              margin: 0 auto;
+              height: 400px;
+              width: 400px;
+              -webkit-transition: -webkit-transform 2s linear;
+              -webkit-transform-style: preserve-3d;
+            }
+            
+            div#cube > div {
+              position: absolute;
+              height: 360px;
+              width: 360px;
+              padding: 20px;
+              color: white;
+            }
+        </style>    
+        
+        <script type="text/javascript">
+            window.onload = function () {
+                var xAngle = 0, yAngle = 0;
+                    document.onkeydown = function(e) {
+                            switch(e.keyCode) {
+                                    case 37: // left
+                                            yAngle -= 180;
+                                            break;
+            
+                                    case 38: // up
+                                            xAngle += 180;
+                                            break;
+            
+                                    case 39: // right
+                                            yAngle += 180;
+                                            break;
+            
+                                    case 40: // down
+                                            xAngle -= 180;
+                                            break;
+                            };
+            
+                            var cube = document.getElementById("cube");
+                            //rotate relatively from the current angle
+                            cube.style.webkitTransform = "rotateX("+xAngle+"deg) rotateY("+yAngle+"deg)";
+                    }
+                }
+        </script>
+    </head>
+    <body>
+        <div id="container">
+            <div id="cube">
+                <div class="side-one">one</div>
+            </div>
+        </div>
+    </body>
+</html>
